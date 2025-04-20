@@ -1,0 +1,27 @@
+# ------------ Stage 1: Scraper ------------
+    FROM node:18-slim AS scraper
+
+    RUN apt-get update && apt-get install -y \
+        chromium \
+        fonts-liberation \
+        && rm -rf /var/lib/apt/lists/*
+    
+    WORKDIR /app
+    COPY package.json scrape.js entrypoint.sh ./
+    ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    RUN npm install
+    RUN chmod +x entrypoint.sh
+    
+    # ------------ Stage 2: Flask Server ------------
+    FROM python:3.10-slim
+    
+    WORKDIR /app
+    COPY server.py requirements.txt ./
+    COPY --from=scraper /app/scrape.js /app/package.json /app/entrypoint.sh ./
+    
+    RUN pip install --no-cache-dir -r requirements.txt
+    RUN apt-get update && apt-get install -y chromium && rm -rf /var/lib/apt/lists/*
+    
+    EXPOSE 5000
+    CMD ["./entrypoint.sh"]
+    
