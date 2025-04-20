@@ -1,4 +1,4 @@
-# ------------ Stage 1: Scraper ------------
+
     FROM node:18-slim AS scraper
 
     RUN apt-get update && apt-get install -y \
@@ -12,7 +12,6 @@
     RUN npm install
     RUN chmod +x entrypoint.sh
     
-    # ------------ Stage 2: Flask Server ------------
     FROM python:3.10-slim
     
     WORKDIR /app
